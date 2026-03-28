@@ -28,7 +28,8 @@ public abstract class OmnivoxScraper {
 	 * It should have the following form: https:// + [Your Cegep Name] +
 	 * .omnivox.ca/intr/Module/Identification/Login/Login.aspx
 	 */
-	private final String loginUrl;
+//	private final String loginUrl = "https://vaniercollege.omnivox.ca/intr/";
+	private final String loginUrl = "https://vaniercollege.omnivox.ca/Login/Account/Login?ReturnUrl=%2fintr%2f";
 
 	/**
 	 * This is the webclient used to connect and make requests to
