@@ -9,7 +9,7 @@ import java.util.List;
 public class VanierScraper extends OmnivoxScraper {
     private final String loginUrl = "https://vaniercollege.omnivox.ca/Login/Account/Login?ReturnUrl=%2fintr%2f";
 
-    public VanierScraper(String loginUrl) throws IllegalArgumentException {
+    public VanierScraper() throws IllegalArgumentException {
         super(loginUrl);
     }
 
