@@ -5,11 +5,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.*;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 import assemblers.Assembler;
@@ -101,16 +101,17 @@ public abstract class OmnivoxScraper {
 	 * the required parameters to run well.
 	 */
 	private final static WebClient newClient() {
-		// Creates client with options
-		WebClient client = new WebClient();
-//		client.getOptions().setJavaScriptEnabled(true);
-		client.getOptions().setCssEnabled(false);
-		client.getOptions().setUseInsecureSSL(true);
-		client.getOptions().setDownloadImages(false);
-		client.getOptions().setPopupBlockerEnabled(true);
-		client.getOptions().setRedirectEnabled(true);
-		client.getOptions().setTimeout(10000);
+		WebClient client = new WebClient(BrowserVersion.CHROME);
+
+		// Silence the noise
 		client.getOptions().setThrowExceptionOnScriptError(false);
+		client.getOptions().setThrowExceptionOnFailingStatusCode(false);
+		client.getOptions().setJavaScriptEnabled(true); // Keep it on, but we'll ignore errors
+		client.getOptions().setCssEnabled(false);
+
+		// Set a very high timeout for background tasks
+		client.setJavaScriptTimeout(15000);
+		client.getOptions().setTimeout(20000);
 
 		return client;
 	}
@@ -122,33 +123,38 @@ public abstract class OmnivoxScraper {
 	 *           make sure you set the homePage field to it's correct value.
 	 */
 	public void login(String username, String password) {
-
 		try {
-			// Hiding warnings
-			java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
-			java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.OFF);
+			// 1. Load the page
+			HtmlPage loginPage = client.getPage(this.loginUrl);
 
-			HtmlPage response = client.getPage(this.loginUrl);
-			HtmlForm form = response.getFormByName("formLogin");
+			// 2. Ignore the JS errors and get the form directly
+			HtmlForm form = loginPage.getFormByName("formLogin");
 
-			String k = form.getInputByName("k").getValueAttribute();
+			// 3. MANUALLY set the fields that the JS button would have set
+			// Based on the HTML you provided, these are the IDs
+			HtmlInput userField = (HtmlInput) loginPage.getHtmlElementById("Identifiant");
+			HtmlInput passField = (HtmlInput) loginPage.getHtmlElementById("Password");
 
-			URL url = new URL(this.loginUrl);
-			WebRequest loginRequest = new WebRequest(url, HttpMethod.POST);
+			userField.setValueAttribute(username);
+			passField.setValueAttribute(password);
 
-			// Filling form requests
-			ArrayList<NameValuePair> requestParams = new ArrayList<NameValuePair>();
-			requestParams.add(new NameValuePair("NoDA", username));
-			requestParams.add(new NameValuePair("PasswordEtu", password));
-			requestParams.add(new NameValuePair("TypeIdentification", "Etudiant"));
-			requestParams.add(new NameValuePair("TypeLogin", "PostSolutionLogin"));
-			requestParams.add(new NameValuePair("k", k));
-			loginRequest.setRequestParameters(requestParams);
+			// 4. MANUALLY set the hidden student type
+			HtmlInput typeId = form.getInputByName("TypeIdentification");
+			typeId.setValueAttribute("Etudiant");
 
-			this.homePage = client.getPage(loginRequest);
+			// 5. Submit the form
+			// We find the button by its class/text since the JS RoleClick didn't run
+			HtmlButton submitBtn = loginPage.getFirstByXPath("//button[contains(., 'Log In')]");
 
-		} catch (IOException e) {
-			e.printStackTrace();
+			this.homePage = submitBtn.click();
+
+			// 6. Wait for the server to process the POST request
+			client.waitForBackgroundJavaScript(5000);
+
+			System.out.println("Final URL after login: " + this.homePage.getUrl());
+
+		} catch (Exception e) {
+			System.err.println("Login Failed: " + e.getMessage());
 		}
 	}
 

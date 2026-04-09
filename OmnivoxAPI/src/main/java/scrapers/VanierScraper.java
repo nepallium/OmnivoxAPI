@@ -76,6 +76,7 @@ public class VanierScraper extends OmnivoxScraper {
     @Override
     public void setLeaPage() {
         try {
+            System.out.println(this.homePage.asXml());
             this.LeaPage = this.homePage.<HtmlElement>getFirstByXPath("//*[@id='region-raccourcis-services-skytech']/a").click();
         } catch (IOException e) {
             e.printStackTrace();
