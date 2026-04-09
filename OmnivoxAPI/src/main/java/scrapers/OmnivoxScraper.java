@@ -53,11 +53,11 @@ public abstract class OmnivoxScraper {
 	public OmnivoxScraper(String loginUrl) throws IllegalArgumentException {
 
 		// Check if it matches the login pattern
-		if (!loginUrl
-				.matches("https:\\/\\/(.+?)\\.omnivox\\.ca\\/intr\\/Module\\/Identification\\/Login\\/Login\\.aspx")) {
-			throw new IllegalArgumentException("The login url is invalid it should match this pattern:"
-					+ "https:// + [Your Cegep Name] + .omnivox.ca/intr/Module/Identification/Login/Login.aspx");
-		}
+//		if (!loginUrl
+//				.matches("https:\\/\\/(.+?)\\.omnivox\\.ca\\/intr\\/Module\\/Identification\\/Login\\/Login\\.aspx")) {
+//			throw new IllegalArgumentException("The login url is invalid it should match this pattern:"
+//					+ "https:// + [Your Cegep Name] + .omnivox.ca/intr/Module/Identification/Login/Login.aspx");
+//		}
 
 		this.loginUrl = loginUrl;
 	}
