@@ -12,14 +12,24 @@ import students.Student;
 import students.StudentManager;
 import students.StudentPrinter;
 
+import java.util.Scanner;
+
 public class Main {
 
 	public static void main(String[] args) {
 
-		if (args.length != 3) {
-			System.out.println("Usage: java Main [CegepName] [StudentNumber] [Password]");
-			System.exit(0);
-		}
+        args = new String[3];
+
+        Scanner scanner = new Scanner(System.in);
+
+        args[0] = scanner.next();
+        args[1] = scanner.next();
+        args[2] = scanner.next();
+
+//		if (args.length != 3) {
+//			System.out.println("Usage: java Main [CegepName] [StudentNumber] [Password]");
+//			System.exit(0);
+//		}
 
 		OmnivoxScraper scraper = null;
 		Assembler assembler = null;
